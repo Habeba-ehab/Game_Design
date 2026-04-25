@@ -1,38 +1,36 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.SceneManagement;
 
 public class EnemyChase : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform player;
+    private bool triggered = false;
+    private AudioSource monsterAudio; // NEW
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        monsterAudio = GetComponent<AudioSource>(); // NEW
     }
 
     void Update()
     {
-        if (player != null)
+        if (player == null || triggered) return;
+
+        agent.SetDestination(player.position);
+
+        // Start playing monster sound when the enemy is active --- NEW
+        if (!monsterAudio.isPlaying)
+            monsterAudio.Play();
+
+        float distance = Vector3.Distance(transform.position, player.position);
+        if (distance < 1.5f)
         {
-            agent.SetDestination(player.position);
-
-            Vector3 direction = player.position - transform.position;
-            direction.y = 0;
-            if (direction != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(direction);
-            }
-
-          
-            float distance = Vector3.Distance(transform.position, player.position);
-            if (distance < 1.5f)
-            {
-                Debug.Log("GAME OVER!");
-                //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            }
+            triggered = true;
+            monsterAudio.Stop(); // Stop growl on catch --- NEW
+            GameManager.instance.ShowGameOver();
         }
     }
 }

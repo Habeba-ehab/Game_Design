@@ -17,11 +17,13 @@ public class CharacterMovement : MonoBehaviour
     private Animator animator;
     private float verticalVelocity = 0f;
     private float gravity = -20f;
+    private AudioSource footstepAudio; // NEW
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        footstepAudio = GetComponent<AudioSource>(); // NEW
     }
 
     void Update()
@@ -40,22 +42,24 @@ public class CharacterMovement : MonoBehaviour
         bool isMoving = (h != 0f || v != 0f);
         animator.SetBool("isRunning", isMoving);
 
-        // Handle gravity
+        // Play footsteps only when moving --- NEW
+        if (isMoving && !footstepAudio.isPlaying)
+            footstepAudio.Play();
+        else if (!isMoving && footstepAudio.isPlaying)
+            footstepAudio.Stop();
+
         if (controller.isGrounded)
             verticalVelocity = -2f;
         else
             verticalVelocity += gravity * Time.deltaTime;
 
-        // Rotation
         if (h != 0f)
             transform.Rotate(0f, h * rotationSpeed * Time.deltaTime, 0f);
 
-        // Movement
         Vector3 move = transform.forward * v;
         move.y = verticalVelocity;
         controller.Move(move * moveSpeed * Time.deltaTime);
 
-        // Clamp boundaries
         Vector3 pos = transform.position;
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.z = Mathf.Clamp(pos.z, minZ, maxZ);

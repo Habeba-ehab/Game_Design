@@ -3,33 +3,24 @@ using UnityEngine;
 public class OrbManager : MonoBehaviour
 {
     public static OrbManager instance;
-    private int orbsCollected = 0;
-    private int totalOrbs;
+    private AudioSource collectSound; // NEW
 
     void Awake()
     {
         instance = this;
+        collectSound = GetComponent<AudioSource>(); // NEW
     }
 
     public void SetTotalOrbs(int total)
     {
-        totalOrbs = total;
-        Debug.Log("Total crystals to collect: " + totalOrbs);
+        GameManager.instance.SetTotalCrystals(total);
     }
 
     public void CollectOrb()
     {
-        orbsCollected++;
-        Debug.Log("Crystals collected: " + orbsCollected + " / " + totalOrbs);
-
-        if (orbsCollected >= totalOrbs)
-        {
-            Debug.Log("All crystals collected! You win!");
-        }
+        if (collectSound != null)
+            collectSound.Play(); // NEW
+            
+        GameManager.instance.CrystalCollected();
     }
 }
-
-// Receives the total number of crystals from CrystalSpawner at the start
-// Every time a crystal is collected it adds 1 to the score
-// Prints score to Console
-// When score reaches total → "You Win!"

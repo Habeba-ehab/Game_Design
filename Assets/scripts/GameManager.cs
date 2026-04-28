@@ -26,8 +26,9 @@ public class GameManager : MonoBehaviour
 
     [Header("Scene Objects")]
     public GameObject enemy;
+    public GameObject obstacles; // NEW — drag your top Obstacle GameObject here
 
-    [Header("Audio")] // NEW
+    [Header("Audio")]
     public AudioSource backgroundMusic;
     public AudioSource playerFootsteps;
 
@@ -49,26 +50,27 @@ public class GameManager : MonoBehaviour
         gameOverPanel.SetActive(false);
         scoreText.gameObject.SetActive(false);
         enemy.SetActive(false);
+        obstacles.SetActive(false); // NEW — make sure obstacles are hidden at start
 
-        // Make sure footsteps don't play before game starts --- NEW
         if (playerFootsteps != null)
             playerFootsteps.Stop();
 
-        easyButton.onClick.AddListener(() => StartGame(false));
-        mediumButton.onClick.AddListener(() => StartGame(true));
-        hardButton.onClick.AddListener(() => StartGame(true));
+        easyButton.onClick.AddListener(() => StartGame(false, false));   // no enemy, no obstacles
+        mediumButton.onClick.AddListener(() => StartGame(true, false));  // enemy, no obstacles
+        hardButton.onClick.AddListener(() => StartGame(true, true));     // enemy + obstacles
 
         playAgainButton.onClick.AddListener(RestartGame);
         restartButton.onClick.AddListener(RestartGame);
     }
 
-    void StartGame(bool withEnemy)
+    void StartGame(bool withEnemy, bool withObstacles) // UPDATED
     {
         Time.timeScale = 1f;
 
         startPanel.SetActive(false);
         scoreText.gameObject.SetActive(true);
         enemy.SetActive(withEnemy);
+        obstacles.SetActive(withObstacles); // NEW
         gameStarted = true;
         UpdateScore();
     }
@@ -91,24 +93,24 @@ public class GameManager : MonoBehaviour
 
     void UpdateScore()
     {
-        scoreText.text = "Ceystals: " + collected + " / " + total;
+        scoreText.text = "Crystals: " + collected + " / " + total;
     }
 
     public void ShowWin()
     {
-        StopAllGameSounds(); // NEW
+        StopAllGameSounds();
         winPanel.SetActive(true);
         Time.timeScale = 0f;
     }
 
     public void ShowGameOver()
     {
-        StopAllGameSounds(); // NEW
+        StopAllGameSounds();
         gameOverPanel.SetActive(true);
         Time.timeScale = 0f;
     }
 
-    void StopAllGameSounds() // NEW
+    void StopAllGameSounds()
     {
         if (backgroundMusic != null) backgroundMusic.Stop();
         if (playerFootsteps != null) playerFootsteps.Stop();
